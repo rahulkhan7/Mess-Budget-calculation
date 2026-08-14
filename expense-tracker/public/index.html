@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ExpenseFlow — Track Your Daily Spending</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <!-- ===================== AUTH SCREEN ===================== -->
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+      <div class="brand">
+        <span class="brand-icon">💸</span>
+        <h1>ExpenseFlow</h1>
+      </div>
+      <p class="auth-subtitle">Track every rupee, every day.</p>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Log In</button>
+        <button class="auth-tab" data-tab="signup">Sign Up</button>
+      </div>
+
+      <form id="login-form" class="auth-form active">
+        <input type="email" id="login-email" placeholder="Email" required autocomplete="email" />
+        <input type="password" id="login-password" placeholder="Password" required autocomplete="current-password" />
+        <button type="submit" class="btn-primary">Log In</button>
+      </form>
+
+      <form id="signup-form" class="auth-form">
+        <input type="text" id="signup-name" placeholder="Full Name" required autocomplete="name" />
+        <input type="email" id="signup-email" placeholder="Email" required autocomplete="email" />
+        <input type="password" id="signup-password" placeholder="Password (min 6 characters)" required autocomplete="new-password" />
+        <button type="submit" class="btn-primary">Create Account</button>
+      </form>
+
+      <p id="auth-error" class="auth-error"></p>
+    </div>
+  </div>
+
+  <!-- ===================== MAIN APP ===================== -->
+  <div id="app-screen" class="app-screen hidden">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-icon">💸</span>
+        <h1>ExpenseFlow</h1>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-view="dashboard">📊 Dashboard</button>
+        <button class="nav-item" data-view="expenses">🧾 Expenses</button>
+        <button class="nav-item" data-view="categories">🏷️ Categories</button>
+        <button class="nav-item" data-view="budgets">🎯 Budgets</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <span id="user-avatar" class="user-avatar"></span>
+          <span id="user-name" class="user-name"></span>
+        </div>
+        <button id="logout-btn" class="btn-logout">Log Out</button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+
+      <!-- ---------- DASHBOARD VIEW ---------- -->
+      <section id="view-dashboard" class="view active">
+        <div class="view-header">
+          <h2>Dashboard</h2>
+          <input type="month" id="dashboard-month" class="month-picker" />
+        </div>
+
+        <div class="stat-cards">
+          <div class="stat-card">
+            <span class="stat-label">Total Spent</span>
+            <span id="stat-total" class="stat-value">₹0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Top Category</span>
+            <span id="stat-top-category" class="stat-value">—</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Daily Average</span>
+            <span id="stat-daily-avg" class="stat-value">₹0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Transactions</span>
+            <span id="stat-count" class="stat-value">0</span>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>Spending by Category</h3>
+            <canvas id="chart-category"></canvas>
+            <div id="chart-category-empty" class="chart-empty hidden">No expenses recorded for this month yet.</div>
+          </div>
+          <div class="chart-card">
+            <h3>Daily Spending</h3>
+            <canvas id="chart-daily"></canvas>
+            <div id="chart-daily-empty" class="chart-empty hidden">No expenses recorded for this month yet.</div>
+          </div>
+          <div class="chart-card wide">
+            <h3>6-Month Trend</h3>
+            <canvas id="chart-trend"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- EXPENSES VIEW ---------- -->
+      <section id="view-expenses" class="view">
+        <div class="view-header">
+          <h2>Expenses</h2>
+          <button id="add-expense-btn" class="btn-primary">+ Add Expense</button>
+        </div>
+
+        <div class="filters-bar">
+          <select id="filter-category"><option value="">All Categories</option></select>
+          <input type="date" id="filter-from" />
+          <input type="date" id="filter-to" />
+          <input type="text" id="filter-search" placeholder="Search notes..." />
+          <button id="filter-clear" class="btn-secondary">Clear</button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="expense-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Note</th>
+                <th>Amount</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="expense-table-body"></tbody>
+          </table>
+          <div id="expense-empty" class="chart-empty hidden">No expenses found. Add your first one!</div>
+        </div>
+      </section>
+
+      <!-- ---------- CATEGORIES VIEW ---------- -->
+      <section id="view-categories" class="view">
+        <div class="view-header">
+          <h2>Categories</h2>
+          <button id="add-category-btn" class="btn-primary">+ New Category</button>
+        </div>
+        <div id="category-grid" class="category-grid"></div>
+      </section>
+
+      <!-- ---------- BUDGETS VIEW ---------- -->
+      <section id="view-budgets" class="view">
+        <div class="view-header">
+          <h2>Budgets</h2>
+          <input type="month" id="budget-month" class="month-picker" />
+        </div>
+        <button id="add-budget-btn" class="btn-primary" style="margin-bottom:16px;">+ Set Budget</button>
+        <div id="budget-list" class="budget-list"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===================== MODALS ===================== -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+
+    <div id="modal-expense" class="modal hidden">
+      <h3 id="expense-modal-title">Add Expense</h3>
+      <form id="expense-form">
+        <input type="hidden" id="expense-id" />
+        <label>Amount (₹)</label>
+        <input type="number" id="expense-amount" step="0.01" min="0.01" required />
+        <label>Category</label>
+        <select id="expense-category"></select>
+        <label>Date</label>
+        <input type="date" id="expense-date" required />
+        <label>Note (optional)</label>
+        <input type="text" id="expense-note" placeholder="e.g. Lunch with friends" />
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="expense-cancel">Cancel</button>
+          <button type="submit" class="btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="modal-category" class="modal hidden">
+      <h3 id="category-modal-title">New Category</h3>
+      <form id="category-form">
+        <input type="hidden" id="category-id" />
+        <label>Name</label>
+        <input type="text" id="category-name" required />
+        <label>Icon (emoji)</label>
+        <input type="text" id="category-icon" placeholder="🏷️" maxlength="4" />
+        <label>Color</label>
+        <input type="color" id="category-color" value="#6c5ce7" />
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="category-cancel">Cancel</button>
+          <button type="submit" class="btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="modal-budget" class="modal hidden">
+      <h3>Set Budget</h3>
+      <form id="budget-form">
+        <label>Category</label>
+        <select id="budget-category"></select>
+        <label>Month</label>
+        <input type="month" id="budget-form-month" required />
+        <label>Budget Amount (₹)</label>
+        <input type="number" id="budget-amount" step="0.01" min="0.01" required />
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="budget-cancel">Cancel</button>
+          <button type="submit" class="btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/charts.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
